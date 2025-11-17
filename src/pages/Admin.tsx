@@ -9,6 +9,7 @@ import { ArrowLeft, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import SupabaseTest from "@/components/SupabaseTest";
+import AddClass from "@/components/AddClass";
 
 interface Feedback {
   id: string;
@@ -133,6 +134,9 @@ const Admin = () => {
         {/* Supabase connection test */}
         <div className="mb-6">
           <SupabaseTest />
+          <div className="mt-4">
+            <AddClass />
+          </div>
         </div>
 
         <Card>

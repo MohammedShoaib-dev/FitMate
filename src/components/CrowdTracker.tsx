@@ -13,6 +13,7 @@ interface OccupancyData {
 const CrowdTracker = () => {
   const [data, setData] = useState<OccupancyData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
   useEffect(() => {
     fetchOccupancy();
@@ -21,12 +22,14 @@ const CrowdTracker = () => {
   }, []);
 
   const fetchOccupancy = async () => {
+    setLoading(true);
     try {
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/gym-occupancy`
       );
       const result = await response.json();
       setData(result);
+      setLastUpdated(new Date().toLocaleTimeString());
     } catch (error) {
       console.error("Error fetching occupancy:", error);
     } finally {
@@ -83,19 +86,18 @@ const CrowdTracker = () => {
       <CardContent>
         {data && (
           <div className="space-y-4">
-            <div className={`text-4xl font-bold ${getColorClass(data.color)}`}>
-              {data.percent}%
-            </div>
-            {typeof data.activeCount === 'number' && typeof data.capacity === 'number' && (
-              <div className="text-sm text-muted-foreground">
-                {data.activeCount} of {data.capacity} currently active
+            <div className="flex items-center gap-4">
+              <div className={`text-4xl font-bold ${getColorClass(data.color)}`}>
+                {data.percent}%
               </div>
-            )}
-            <div className={`inline-block px-4 py-2 rounded-full ${getBgClass(data.color)}`}>
-              <span className={`font-medium ${getColorClass(data.color)}`}>
-                {data.status}
-              </span>
+              <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm ${getBgClass(data.color)}`}>
+                <span className={`mr-2 ${getColorClass(data.color)}`}>{data.status}</span>
+                {typeof data.activeCount === 'number' && typeof data.capacity === 'number' && (
+                  <span className="text-muted-foreground">{data.activeCount}/{data.capacity}</span>
+                )}
+              </div>
             </div>
+            <div className="text-xs text-muted-foreground">Last updated: {lastUpdated}</div>
           </div>
         )}
       </CardContent>

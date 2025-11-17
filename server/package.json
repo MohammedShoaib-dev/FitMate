@@ -1,0 +1,13 @@
+{
+  "name": "fitmate-server",
+  "version": "0.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "@supabase/supabase-js": "^2.34.0"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}

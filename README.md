@@ -4,70 +4,36 @@
 
 **URL**: https://lovable.dev/projects/740c90ea-d4a1-4367-bc3b-a5db11041371
 
-## How can I edit this code?
+# FitMate
 
-There are several ways of editing your application.
+A Vite + React + Supabase starter for gym management and occupancy tracking.
 
-**Use Lovable**
+Quick start
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/740c90ea-d4a1-4367-bc3b-a5db11041371) and start prompting.
+1. Install dependencies:
 
-Changes made via Lovable will be committed automatically to this repo.
+```bash
+npm install
+```
 
-**Use your preferred IDE**
+2. Add your Supabase keys to `.env` (Vite requires `VITE_` prefix):
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+```env
+VITE_SUPABASE_URL="https://<project>.supabase.co"
+VITE_SUPABASE_PUBLISHABLE_KEY="<anon-key>"
+```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+3. Run dev server:
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Supabase function: `supabase/functions/gym-occupancy/index.ts`
+- Edge function that returns `status`, `percent`, `color`, and `activeCount`.
+- Configure `CAPACITY` and `WINDOW_MINUTES` via environment variables in Supabase.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Notes
 
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/740c90ea-d4a1-4367-bc3b-a5db11041371) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- Do not commit service_role keys. Use them server-side only.
+- To more accurately track occupancy, add a `last_active` column to `profiles` and update it on login.

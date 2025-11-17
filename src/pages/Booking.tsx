@@ -35,6 +35,11 @@ const Booking = () => {
         loadClasses(session.user.id);
       }
     });
+    const onCreated = () => {
+      if (userId) loadClasses(userId);
+    };
+    window.addEventListener('gym:class:created', onCreated as EventListener);
+    return () => window.removeEventListener('gym:class:created', onCreated as EventListener);
   }, [navigate]);
 
   const loadClasses = async (uid: string) => {

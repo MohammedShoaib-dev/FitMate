@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,20 +15,27 @@ export default function AddClass() {
   const [category, setCategory] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const { toast } = useToast();
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     try {
-      const { error } = await supabase.from("gym_classes").insert({
-        name,
-        instructor,
-        description,
-        start_time: startTime,
-        end_time: endTime,
-        capacity,
-        category,
+      const resp = await fetch(`${window.location.origin}/admin/create-class`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          instructor,
+          description,
+          start_time: startTime,
+          end_time: endTime,
+          capacity,
+          category,
+        }),
       });
-      if (error) throw error;
+      const body = await resp.json();
+      if (!resp.ok) throw body;
       // reset
       setName("");
       setInstructor("");
@@ -37,9 +44,11 @@ export default function AddClass() {
       setEndTime("");
       setCapacity(20);
       setCategory("");
-      alert("Class added");
+      toast({ title: 'Class added' });
+      // notify other windows/components
+      window.dispatchEvent(new CustomEvent('gym:class:created', { detail: body }));
     } catch (err: any) {
-      alert(err.message || "Failed to add class");
+      toast({ title: 'Error', description: err.message || JSON.stringify(err), variant: 'destructive' });
     } finally {
       setLoading(false);
     }

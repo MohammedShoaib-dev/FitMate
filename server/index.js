@@ -25,4 +25,23 @@ app.post('/admin/create-user', async (req, res) => {
   }
 });
 
+app.post('/admin/create-class', async (req, res) => {
+  const { name, instructor, description, start_time, end_time, capacity, category } = req.body;
+  try {
+    const { data, error } = await supabase.from('gym_classes').insert({
+      name,
+      instructor,
+      description,
+      start_time,
+      end_time,
+      capacity,
+      category,
+    });
+    if (error) return res.status(400).json({ error });
+    res.json(data?.[0] || data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.listen(3001, () => console.log('Server running on http://localhost:3001'));

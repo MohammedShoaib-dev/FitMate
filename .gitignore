@@ -24,8 +24,6 @@ dist-ssr
 *.sw?
 
 # Local env and lockfiles
-.env
-.env.local
 npm-debug.log
 yarn-error.log
 pnpm-lock.yaml

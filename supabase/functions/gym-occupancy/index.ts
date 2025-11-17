@@ -19,13 +19,33 @@ serve(async (req) => {
     try {
       // Query Postgres via REST endpoint for profiles created/updated in the last WINDOW_MINUTES
       const since = new Date(Date.now() - WINDOW_MINUTES * 60 * 1000).toISOString();
-      const resp = await fetch(`${Deno.env.get('SUPABASE_URL')}/rest/v1/profiles?created_at=gte.${since}`, {
-        headers: { apikey: Deno.env.get('SUPABASE_ANON_KEY') || '', Authorization: `Bearer ${Deno.env.get('SUPABASE_ANON_KEY') || ''}` },
+      const encodedSince = encodeURIComponent(since);
+      // request only ids but ask PostgREST to return an exact count in headers
+      const url = `${Deno.env.get('SUPABASE_URL')}/rest/v1/profiles?created_at=gte.${encodedSince}&select=id`;
+      const resp = await fetch(url, {
+        headers: {
+          apikey: Deno.env.get('SUPABASE_ANON_KEY') || '',
+          Authorization: `Bearer ${Deno.env.get('SUPABASE_ANON_KEY') || ''}`,
+          Prefer: 'count=exact'
+        },
       });
 
       if (resp.ok) {
-        const items = await resp.json();
-        const activeCount = Array.isArray(items) ? items.length : 0;
+        // Try to parse total from Content-Range header (format: 0-9/123)
+        const contentRange = resp.headers.get('content-range');
+        let activeCount = 0;
+        if (contentRange) {
+          const parts = contentRange.split('/');
+          if (parts.length === 2) {
+            const total = Number(parts[1]);
+            if (!Number.isNaN(total)) activeCount = total;
+          }
+        }
+        // fallback to JSON length if header missing
+        if (activeCount === 0) {
+          const items = await resp.json();
+          activeCount = Array.isArray(items) ? items.length : 0;
+        }
         const percent = Math.min(100, Math.round((activeCount / CAPACITY) * 100));
         let status = 'Quiet';
         let color = 'green';

@@ -11,27 +11,58 @@ serve(async (req) => {
   }
 
   try {
-    // Mock crowd tracking with time-based logic
+    // Attempt to compute occupancy from recent profile activity (proxy for logins)
+    // Config: capacity from env or default 100
+    const CAPACITY = Number(Deno.env.get('CAPACITY') || '100');
+    const WINDOW_MINUTES = Number(Deno.env.get('WINDOW_MINUTES') || '60');
+
+    try {
+      // Query Postgres via REST endpoint for profiles created/updated in the last WINDOW_MINUTES
+      const since = new Date(Date.now() - WINDOW_MINUTES * 60 * 1000).toISOString();
+      const resp = await fetch(`${Deno.env.get('SUPABASE_URL')}/rest/v1/profiles?created_at=gte.${since}`, {
+        headers: { apikey: Deno.env.get('SUPABASE_ANON_KEY') || '', Authorization: `Bearer ${Deno.env.get('SUPABASE_ANON_KEY') || ''}` },
+      });
+
+      if (resp.ok) {
+        const items = await resp.json();
+        const activeCount = Array.isArray(items) ? items.length : 0;
+        const percent = Math.min(100, Math.round((activeCount / CAPACITY) * 100));
+        let status = 'Quiet';
+        let color = 'green';
+        if (percent >= 80) {
+          status = 'Very Busy';
+          color = 'red';
+        } else if (percent >= 40) {
+          status = 'Moderately Busy';
+          color = 'yellow';
+        }
+
+        console.log('Gym occupancy:', { status, percent, color, activeCount, capacity: CAPACITY });
+
+        return new Response(
+          JSON.stringify({ status, percent, color, activeCount, capacity: CAPACITY }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      // fallthrough to time-based mock if fetch fails
+    } catch (err) {
+      console.warn('Activity-based occupancy failed, falling back to time-based mock', err);
+    }
+
+    // --- fallback: Mock crowd tracking with time-based logic ---
     const hour = new Date().getHours();
-    
     let status: string;
     let percent: number;
     let color: string;
-    
-    // Peak hours: 6-9 AM and 5-8 PM
     if ((hour >= 6 && hour <= 9) || (hour >= 17 && hour <= 20)) {
       percent = Math.floor(Math.random() * 20) + 70; // 70-90%
       status = 'Very Busy';
       color = 'red';
-    } 
-    // Moderate hours: 10 AM - 4 PM
-    else if (hour >= 10 && hour <= 16) {
+    } else if (hour >= 10 && hour <= 16) {
       percent = Math.floor(Math.random() * 30) + 40; // 40-70%
       status = 'Moderately Busy';
       color = 'yellow';
-    } 
-    // Off-peak hours
-    else {
+    } else {
       percent = Math.floor(Math.random() * 30) + 10; // 10-40%
       status = 'Quiet';
       color = 'green';

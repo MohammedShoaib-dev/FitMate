@@ -54,7 +54,7 @@ serve(async (req) => {
           color = 'red';
         } else if (percent >= 40) {
           status = 'Moderately Busy';
-          color = 'yellow';
+          color = 'yellow';        
         }
 
         console.log('Gym occupancy:', { status, percent, color, activeCount, capacity: CAPACITY });

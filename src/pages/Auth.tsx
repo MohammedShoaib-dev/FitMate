@@ -34,14 +34,14 @@ const Auth = () => {
         if (error) throw error;
         toast({ title: "Welcome back!" });
         try {
-          // record activity for occupancy calculations by updating profiles.last_active
+          // update last_active for occupancy calculations
           const user = data?.session?.user;
           if (user) {
-            await supabase.from('profiles').upsert({ id: user.id, created_at: new Date().toISOString() }, { onConflict: 'id' });
-            await supabase.from('profiles').update({ created_at: new Date().toISOString() }).eq('id', user.id);
+            await supabase.from('profiles').upsert({ id: user.id }, { onConflict: 'id' });
+            await supabase.from('profiles').update({ last_active: new Date().toISOString() }).eq('id', user.id);
           }
         } catch (err) {
-          console.warn('Failed to log user activity', err);
+          console.warn('Failed to update last_active', err);
         }
         navigate("/dashboard");
       } else {
@@ -56,10 +56,10 @@ const Auth = () => {
         try {
           const user = data?.user;
           if (user) {
-            await supabase.from('profiles').upsert({ id: user.id, created_at: new Date().toISOString() }, { onConflict: 'id' });
+            await supabase.from('profiles').upsert({ id: user.id, last_active: new Date().toISOString() }, { onConflict: 'id' });
           }
         } catch (err) {
-          console.warn('Failed to log signup activity', err);
+          console.warn('Failed to update signup last_active', err);
         }
         navigate("/dashboard");
       }

@@ -6,6 +6,8 @@ interface OccupancyData {
   status: string;
   percent: number;
   color: string;
+  activeCount?: number;
+  capacity?: number;
 }
 
 const CrowdTracker = () => {
@@ -84,6 +86,11 @@ const CrowdTracker = () => {
             <div className={`text-4xl font-bold ${getColorClass(data.color)}`}>
               {data.percent}%
             </div>
+            {typeof data.activeCount === 'number' && typeof data.capacity === 'number' && (
+              <div className="text-sm text-muted-foreground">
+                {data.activeCount} of {data.capacity} currently active
+              </div>
+            )}
             <div className={`inline-block px-4 py-2 rounded-full ${getBgClass(data.color)}`}>
               <span className={`font-medium ${getColorClass(data.color)}`}>
                 {data.status}

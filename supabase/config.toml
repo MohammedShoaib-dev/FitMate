@@ -1,0 +1,7 @@
+project_id = "rhwulhxsizuluqxtrjhe"
+
+[functions.ai-workout-planner]
+verify_jwt = false
+
+[functions.gym-occupancy]
+verify_jwt = false
